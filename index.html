@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        #tic-tac-toe {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+            justify-content: center;
+            margin: 20px auto;
+            transition: transform 0.3s ease-in-out;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #fff;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .cell:hover {
+            background-color: #e0e0e0;
+            transform: scale(1.05);
+        }
+        .cell img {
+            max-width: 90px;
+            max-height: 90px;
+            transition: opacity 0.3s ease;
+        }
+        .cell.disabled img {
+            opacity: 0.5;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        button:hover {
+            background-color: #555;
+            transform: scale(1.05);
+        }
+        #player-form {
+            margin: 20px auto;
+        }
+        #player-form input {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #player-form input:focus {
+            border-color: #333;
+            outline: none;
+        }
+        #player-form button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #balloon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 20;
+            display: none;
+        }
+        #balloon-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #ff5722;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        @keyframes balloon-pop {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        #balloon.animate {
+            animation: balloon-pop 2s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <img src="https://i.postimg.cc/kGg87N39/tic-tac-toe-name.gif" alt="Tic Tac Toe" style="margin-top: 0px;">
+
+    <div id="player-form">
+        <input type="text" id="playerX" placeholder="Enter Player X's Name">
+        <input type="text" id="playerO" placeholder="Enter Player O's Name">
+        <button id="startGameButton" onclick="startGame()">Start Game</button>
+    </div>
+
+    <div id="tic-tac-toe" style="display:none;">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+    </div>
+    <div id="status">Player X's turn</div>
+    <button id="restartGameButton" onclick="restartGame()">Restart Game</button>
+
+    <div id="balloon">
+        <div id="balloon-text"></div>
+    </div>
+
+    <script>
+        const board = Array(9).fill(null);
+        const X_IMG = "https://i.postimg.cc/rF43S5RQ/x-transparent-tic-tac-toe-9.png";
+        const O_IMG = "https://i.postimg.cc/JzWgKtbm/o-transparent-tic-tac-toe-9.png";
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let playerXName = '';
+        let playerOName = '';
+
+        const cells = document.querySelectorAll('.cell');
+        const statusDisplay = document.getElementById('status');
+        const playerForm = document.getElementById('player-form');
+        const gameBoard = document.getElementById('tic-tac-toe');
+        const balloon = document.getElementById('balloon');
+        const balloonText = document.getElementById('balloon-text');
+
+        const winningCombinations = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+
+        function startGame() {
+            playerXName = document.getElementById('playerX').value || 'Player X';
+            playerOName = document.getElementById('playerO').value || 'Player O';
+            currentPlayer = 'X';
+            statusDisplay.textContent = `${playerXName}'s turn`;
+            playerForm.style.display = 'none';
+            gameBoard.style.display = 'grid';
+        }
+
+        function handleCellClick(event) {
+            const cell = event.target;
+            const cellIndex = cell.getAttribute('data-index');
+
+            if (board[cellIndex] !== null || !gameActive) {
+                return;
+            }
+
+            board[cellIndex] = currentPlayer;
+            updateBoard(cell);
+
+            if (checkWinner()) {
+                showBalloon(`${currentPlayer === 'X' ? playerXName : playerOName} wins!`);
+                gameActive = false;
+            } else if (board.every(cell => cell !== null)) {
+                statusDisplay.textContent = "It's a tie!";
+                gameActive = false;
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                statusDisplay.textContent = `${currentPlayer === 'X' ? playerXName : playerOName}'s turn`;
+            }
+        }
+
+        function updateBoard(cell) {
+            const playerImage = currentPlayer === 'X' ? X_IMG : O_IMG;
+            cell.innerHTML = `<img src="${playerImage}" alt="${currentPlayer}">`;
+            cell.classList.add('disabled');
+        }
+
+        function checkWinner() {
+            return winningCombinations.some(combination => {
+                return combination.every(index => board[index] === currentPlayer);
+            });
+        }
+
+        function showBalloon(message) {
+            balloonText.textContent = message;
+            balloon.style.display = 'flex';
+            balloon.classList.add('animate');
+
+            setTimeout(() => {
+                balloon.classList.remove('animate');
+                setTimeout(() => {
+                    balloon.style.display = 'none';
+                }, 1000);
+            }, 2000);
+        }
+
+        function restartGame() {
+            board.fill(null);
+            currentPlayer = 'X';
+            gameActive = true;
+            statusDisplay.textContent = `${playerXName}'s turn`;
+            cells.forEach(cell => {
+                cell.innerHTML = '';
+                cell.classList.remove('disabled');
+            });
+            playerForm.style.display = 'block';
+            gameBoard.style.display = 'none';
+            playerXName = '';
+            playerOName = '';
+            balloon.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
