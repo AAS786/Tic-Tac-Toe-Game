@@ -3,268 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic Tac Toe</title>
+    <title>Tic-Tac-Toe Game</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-        }
-        #tic-tac-toe {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 10px;
-            justify-content: center;
-            margin: 20px auto;
-            width: 90vw;
-            max-width: 400px;
-        }
-        .cell {
-            width: 100%;
-            height: 100px;
-            background-color: #fff;
-            border: 2px solid #333;
+            background-color: #192734;
             display: flex;
-            align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            touch-action: manipulation;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
         }
-        .cell:hover {
-            background-color: #e0e0e0;
-            transform: scale(1.05);
+
+        .game-container {
+            text-align: center;
+            color: white;
         }
-        .cell img {
-            max-width: 80px;
-            max-height: 80px;
-            transition: opacity 0.3s ease;
+
+        .title {
+            font-size: 2.5em;
         }
-        .cell.disabled img {
-            opacity: 0.5;
+
+        .highlight-green {
+            color: #00ff87;
         }
-        #status {
-            margin-top: 20px;
-            font-size: 5vw;
-            color: #333;
+
+        .turn-indicator {
+            margin: 0 10px;
+            font-size: 1.8em;
             font-weight: bold;
         }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .tile {
+            width: 100px;
+            height: 100px;
+            background-color: #222b36;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .tile:hover {
+            background-color: #2a3c4f;
+        }
+
+        .tile.x-mark {
+            color: #00ff87;
+        }
+
+        .tile.o-mark {
+            color: #00f4ff;
+        }
+
+        .tile.clicked {
+            pointer-events: none;
+            transform: scale(1.05);
+        }
+
+        .message {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+
         button {
             margin-top: 20px;
             padding: 10px 20px;
-            font-size: 4vw;
-            cursor: pointer;
-            background-color: #333;
-            color: white;
+            font-size: 1em;
+            background-color: #00ff87;
+            color: #192734;
             border: none;
             border-radius: 5px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            cursor: pointer;
         }
+
         button:hover {
-            background-color: #555;
-            transform: scale(1.05);
+            background-color: #00cc70;
         }
-        #player-form {
-            margin: 20px auto;
-        }
-        #player-form input {
-            margin: 5px;
-            padding: 10px;
-            font-size: 4vw;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            width: 40vw;
-        }
-        #player-form input:focus {
-            border-color: #333;
-            outline: none;
-        }
-        #player-form button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 4vw;
-            cursor: pointer;
-            background-color: #333;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-        #balloon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+
+        /* Styling for X and O buttons */
+        .xo-buttons {
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
             align-items: center;
-            z-index: 20;
-            display: none;
         }
-        #balloon-text {
-            font-size: 6vw;
+
+        .xo-buttons button {
+            background: linear-gradient(45deg, #00ff87, #00f4ff);
+            color: white;
+            padding: 20px 40px;
+            font-size: 1.5em;
             font-weight: bold;
-            color: #fff;
-            background-color: #ff5722;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            transition: transform 0.2s ease, background-color 0.2s ease;
         }
-        @keyframes balloon-pop {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.8; }
-            100% { transform: scale(0); opacity: 0; }
+
+        .xo-buttons button:hover {
+            transform: scale(1.1);
+            background-color: #1e2a38;
         }
-        #balloon.animate {
-            animation: balloon-pop 2s ease-out forwards;
-        }
-        @media (max-width: 600px) {
-            .cell {
-                height: 80px;
-            }
-            .cell img {
-                max-width: 70px;
-                max-height: 70px;
-            }
-            #status {
-                font-size: 6vw;
-            }
-            button {
-                font-size: 5vw;
-            }
-            #player-form input {
-                width: 70vw;
-                font-size: 5vw;
-            }
-        }
+
     </style>
 </head>
 <body>
 
-    <img src="https://i.postimg.cc/kGg87N39/tic-tac-toe-name.gif" alt="Tic Tac Toe" style="margin-top: 0px;">
-
-    <div id="player-form">
-        <input type="text" id="playerX" placeholder="Enter Player X's Name">
-        <input type="text" id="playerO" placeholder="Enter Player O's Name">
-        <button id="startGameButton" onclick="startGame()">Start Game</button>
-    </div>
-
-    <div id="tic-tac-toe" style="display:none;">
-        <div class="cell" data-index="0"></div>
-        <div class="cell" data-index="1"></div>
-        <div class="cell" data-index="2"></div>
-        <div class="cell" data-index="3"></div>
-        <div class="cell" data-index="4"></div>
-        <div class="cell" data-index="5"></div>
-        <div class="cell" data-index="6"></div>
-        <div class="cell" data-index="7"></div>
-        <div class="cell" data-index="8"></div>
-    </div>
-    <div id="status">Player X's turn</div>
-    <button id="restartGameButton" onclick="restartGame()">Restart Game</button>
-
-    <div id="balloon">
-        <div id="balloon-text"></div>
+    <div class="game-container">
+        <h1 class="title">TicTacToe <br><span class="highlight-green">Game</span></h1>
+        
+        <!-- X and O buttons for switching turn with turn indicator in between -->
+        <div class="xo-buttons">
+            <button id="xBtn">X</button>
+            <div class="turn-indicator" id="turnIndicator">X's turn</div>
+            <button id="oBtn">O</button>
+        </div>
+        
+        <div class="board" id="board">
+            <div class="tile" data-index="0"></div>
+            <div class="tile" data-index="1"></div>
+            <div class="tile" data-index="2"></div>
+            <div class="tile" data-index="3"></div>
+            <div class="tile" data-index="4"></div>
+            <div class="tile" data-index="5"></div>
+            <div class="tile" data-index="6"></div>
+            <div class="tile" data-index="7"></div>
+            <div class="tile" data-index="8"></div>
+        </div>
+        
+        <div class="message" id="message"></div>
+        <button id="restartBtn" style="display:none;">Restart Game</button>
     </div>
 
     <script>
-        const board = Array(9).fill(null);
-        const X_IMG = "https://i.postimg.cc/rF43S5RQ/x-transparent-tic-tac-toe-9.png";
-        const O_IMG = "https://i.postimg.cc/JzWgKtbm/o-transparent-tic-tac-toe-9.png";
+        const tiles = document.querySelectorAll('.tile');
+        const turnIndicator = document.getElementById('turnIndicator');
+        const messageElement = document.getElementById('message');
+        const restartBtn = document.getElementById('restartBtn');
+        const xBtn = document.getElementById('xBtn');
+        const oBtn = document.getElementById('oBtn');
+
+        let board = ['', '', '', '', '', '', '', '', ''];
         let currentPlayer = 'X';
-        let gameActive = true;
-        let playerXName = '';
-        let playerOName = '';
+        let isGameOver = false;
 
-        const cells = document.querySelectorAll('.cell');
-        const statusDisplay = document.getElementById('status');
-        const playerForm = document.getElementById('player-form');
-        const gameBoard = document.getElementById('tic-tac-toe');
-        const balloon = document.getElementById('balloon');
-        const balloonText = document.getElementById('balloon-text');
-
-        const winningCombinations = [
-            [0, 1, 2],
-            [3, 4, 5],
-            [6, 7, 8],
-            [0, 3, 6],
-            [1, 4, 7],
-            [2, 5, 8],
-            [0, 4, 8],
-            [2, 4, 6]
+        const winningCombos = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
         ];
 
-        cells.forEach(cell => {
-            cell.addEventListener('click', handleCellClick);
+        tiles.forEach(tile => {
+            tile.addEventListener('click', handleClick);
         });
 
-        function startGame() {
-            playerXName = document.getElementById('playerX').value || 'Player X';
-            playerOName = document.getElementById('playerO').value || 'Player O';
-            currentPlayer = 'X';
-            statusDisplay.textContent = `${playerXName}'s turn`;
-            playerForm.style.display = 'none';
-            gameBoard.style.display = 'grid';
-        }
+        xBtn.addEventListener('click', () => switchTurn('X'));
+        oBtn.addEventListener('click', () => switchTurn('O'));
 
-        function handleCellClick(event) {
-            const cell = event.target;
-            const cellIndex = cell.getAttribute('data-index');
+        function handleClick(e) {
+            const index = e.target.dataset.index;
 
-            if (board[cellIndex] !== null || !gameActive) {
-                return;
-            }
-
-            board[cellIndex] = currentPlayer;
-            updateBoard(cell);
-
-            if (checkWinner()) {
-                showBalloon(`${currentPlayer === 'X' ? playerXName : playerOName} wins!`);
-                gameActive = false;
-            } else if (board.every(cell => cell !== null)) {
-                statusDisplay.textContent = "It's a tie!";
-                gameActive = false;
-            } else {
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                statusDisplay.textContent = `${currentPlayer === 'X' ? playerXName : playerOName}'s turn`;
+            if (board[index] === '' && !isGameOver) {
+                board[index] = currentPlayer;
+                e.target.classList.add('clicked');
+                e.target.classList.add(currentPlayer === 'X' ? 'x-mark' : 'o-mark');
+                e.target.textContent = currentPlayer;
+                
+                if (checkWin()) {
+                    messageElement.textContent = `${currentPlayer} wins!`;
+                    endGame();
+                } else if (board.every(tile => tile !== '')) {
+                    messageElement.textContent = "It's a draw!";
+                    endGame();
+                } else {
+                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                    turnIndicator.textContent = `${currentPlayer}'s turn`;
+                }
             }
         }
 
-        function updateBoard(cell) {
-            const playerImage = currentPlayer === 'X' ? X_IMG : O_IMG;
-            cell.innerHTML = `<img src="${playerImage}" alt="${currentPlayer}">`;
-            cell.classList.add('disabled');
+        function switchTurn(player) {
+            if (!isGameOver) {
+                currentPlayer = player;
+                turnIndicator.textContent = `${currentPlayer}'s turn`;
+            }
         }
 
-        function checkWinner() {
-            return winningCombinations.some(combination => {
-                return combination.every(index => board[index] === currentPlayer);
+        function checkWin() {
+            return winningCombos.some(combo => {
+                return combo.every(index => {
+                    return board[index] === currentPlayer;
+                });
             });
         }
 
-        function showBalloon(message) {
-            balloonText.textContent = message;
-            balloon.style.display = 'flex';
-            balloon.classList.add('animate');
-
-            setTimeout(() => {
-                balloon.classList.remove('animate');
-                balloon.style.display = 'none';
-            }, 2000);
+        function endGame() {
+            isGameOver = true;
+            turnIndicator.textContent = '';
+            restartBtn.style.display = 'inline-block';
         }
+
+        restartBtn.addEventListener('click', restartGame);
 
         function restartGame() {
-            board.fill(null);
-            cells.forEach(cell => {
-                cell.innerHTML = '';
-                cell.classList.remove('disabled');
+            board = ['', '', '', '', '', '', '', '', ''];
+            tiles.forEach(tile => {
+                tile.textContent = '';
+                tile.classList.remove('clicked', 'x-mark', 'o-mark');
             });
             currentPlayer = 'X';
-            gameActive = true;
-            statusDisplay.textContent = `${playerXName}'s turn`;
+            isGameOver = false;
+            turnIndicator.textContent = `${currentPlayer}'s turn`;
+            messageElement.textContent = '';
+            restartBtn.style.display = 'none';
         }
     </script>
+
 </body>
 </html>
